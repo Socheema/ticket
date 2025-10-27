@@ -1,0 +1,22 @@
+{
+    "name": "vp/twig-project",
+    "description": "Twig-based ticket management app for HNG",
+    "type": "project",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Vp\\TwigProject\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Azubuike Chima",
+            "email": "chimafrancis94@gmail.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+        "twig/twig": "^3.0",
+        "vlucas/phpdotenv": "^5.5"
+    }
+}
