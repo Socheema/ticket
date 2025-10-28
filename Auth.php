@@ -1,10 +1,42 @@
 <?php
 
+/**
+ * File-backed Auth implementation for zero-DB mode
+ *
+ * Users are persisted to a JSON file (`users.json`) so accounts survive restarts.
+ * Passwords are stored hashed. This is still not intended for production use,
+ * but provides a simple persistent store without a database.
+ */
 class Auth {
-    private $db;
+    private $dataFile;
+    private $users = [];
 
-    public function __construct(Database $db) {
-        $this->db = $db;
+    public function __construct($dataFile = null) {
+        if (session_status() === PHP_SESSION_NONE) {
+            @session_start();
+        }
+        if ($dataFile === null) {
+            $dataFile = defined('USERS_FILE') ? USERS_FILE : (__DIR__ . '/users.json');
+        }
+        $this->dataFile = $dataFile;
+        if (!file_exists($this->dataFile)) {
+            @file_put_contents($this->dataFile, json_encode([], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+        }
+        $this->reloadUsers();
+    }
+
+    private function reloadUsers() {
+        $json = @file_get_contents($this->dataFile);
+        $data = json_decode($json, true);
+        $this->users = is_array($data) ? $data : [];
+    }
+
+    private function writeUsers() {
+        $tmp = $this->dataFile . '.tmp';
+        file_put_contents($tmp, json_encode(array_values($this->users), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+        rename($tmp, $this->dataFile);
+        // reload to ensure canonical form
+        $this->reloadUsers();
     }
 
     public function signup($name, $email, $password, $confirmPassword) {
@@ -25,35 +57,38 @@ class Auth {
             return ['success' => false, 'error' => 'Passwords do not match'];
         }
 
-        // Check if email already exists
-        $existing = $this->db->fetchOne(
-            "SELECT id FROM users WHERE email = ?",
-            [$email]
-        );
-
-        if ($existing) {
-            return ['success' => false, 'error' => 'Email already registered'];
+        // Check if email already exists in file store
+        foreach ($this->users as $u) {
+            if (isset($u['email']) && strtolower($u['email']) === strtolower($email)) {
+                return ['success' => false, 'error' => 'Email already registered'];
+            }
         }
 
-        // Create user
+        $maxId = 0;
+        foreach ($this->users as $u) {
+            $maxId = max($maxId, (int)($u['id'] ?? 0));
+        }
+        $newId = $maxId + 1;
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-        
-        $result = $this->db->query(
-            "INSERT INTO users (name, email, password, created_at) VALUES (?, ?, ?, NOW())",
-            [$name, $email, $hashedPassword]
-        );
+        $user = [
+            'id' => $newId,
+            'name' => $name,
+            'email' => $email,
+            'password' => $hashedPassword,
+            'created_at' => date('Y-m-d H:i:s')
+        ];
+        $this->users[] = $user;
+        $this->writeUsers();
 
-        if ($result) {
-            $userId = $this->db->lastInsertId();
-            $user = $this->db->fetchOne("SELECT id, name, email FROM users WHERE id = ?", [$userId]);
-            
-            $_SESSION['user_id'] = $user['id'];
-            $_SESSION['user'] = $user;
+        // Set session as logged in
+        $_SESSION['user_id'] = $user['id'];
+        $_SESSION['user'] = [
+            'id' => $user['id'],
+            'name' => $user['name'],
+            'email' => $user['email']
+        ];
 
-            return ['success' => true];
-        }
-
-        return ['success' => false, 'error' => 'Registration failed'];
+        return ['success' => true];
     }
 
     public function login($email, $password) {
@@ -62,36 +97,54 @@ class Auth {
             return ['success' => false, 'error' => 'Please fill in all fields'];
         }
 
-        // Get user
-        $user = $this->db->fetchOne(
-            "SELECT id, name, email, password FROM users WHERE email = ?",
-            [$email]
-        );
+        $found = null;
+        foreach ($this->users as $u) {
+            if (isset($u['email']) && strtolower($u['email']) === strtolower($email)) {
+                $found = $u;
+                break;
+            }
+        }
 
-        if (!$user) {
+        if (!$found) {
             return ['success' => false, 'error' => 'Invalid credentials'];
         }
 
-        // Verify password
-        if (!password_verify($password, $user['password'])) {
+        if (!password_verify($password, $found['password'])) {
             return ['success' => false, 'error' => 'Invalid credentials'];
         }
 
         // Set session
-        unset($user['password']);
-        $_SESSION['user_id'] = $user['id'];
-        $_SESSION['user'] = $user;
+        $_SESSION['user_id'] = $found['id'];
+        $_SESSION['user'] = [
+            'id' => $found['id'],
+            'name' => $found['name'],
+            'email' => $found['email']
+        ];
 
         return ['success' => true];
     }
 
     public function logout() {
-        session_destroy();
-        session_start();
+        unset($_SESSION['user_id']);
+        unset($_SESSION['user']);
+        if (function_exists('session_regenerate_id')) {
+            session_regenerate_id(true);
+        }
+        return true;
     }
 
     public function getCurrentUser() {
-        return $_SESSION['user'] ?? null;
+        if (!isset($_SESSION['user_id'])) return null;
+        $uid = $_SESSION['user_id'];
+        foreach ($this->users as $u) {
+            if ((int)($u['id'] ?? 0) === (int)$uid) {
+                return ['id' => $u['id'], 'name' => $u['name'], 'email' => $u['email']];
+            }
+        }
+        // user id in session but not found in file (stale session)
+        unset($_SESSION['user_id']);
+        unset($_SESSION['user']);
+        return null;
     }
 
     public function isAuthenticated() {
