@@ -8,8 +8,9 @@ return [
     'db_user' => getenv('DB_USER') ?: 'root',
     'db_pass' => getenv('DB_PASS') ?: '',
 
-    // App base path (use empty string for root, or '/twig' if hosted in a subdirectory)
-    'app_base' => getenv('APP_BASE') ?: '/twig',
+    // App base path. Recommended: leave unset to auto-detect at runtime.
+    // Use empty string for root, or '/twig' if hosted in a subdirectory.
+    'app_base' => getenv('APP_BASE') !== false ? getenv('APP_BASE') : '',
 
     // Session settings (override as needed)
     'session_cookie_secure' => getenv('SESSION_COOKIE_SECURE') !== false ? (bool)getenv('SESSION_COOKIE_SECURE') : false,
