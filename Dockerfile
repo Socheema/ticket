@@ -71,7 +71,7 @@ if (session_status() === PHP_SESSION_NONE) {
     @session_start();
 }
 PHP
-; fi
+fi
 
 # Ensure cache directory exists and is writable
 RUN mkdir -p /var/www/html/cache && chown -R www-data:www-data /var/www/html/cache
