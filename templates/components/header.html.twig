@@ -17,12 +17,12 @@
                 {% endif %}
 
                 {% if user %}
-                    <div class="relative group">
-                        <button class="h-10 w-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-semibold hover:opacity-80 transition-opacity">
+                    <div class="relative">
+                        <button id="user-menu-button" type="button" aria-haspopup="true" aria-expanded="false" class="h-10 w-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-semibold hover:opacity-80 transition-opacity">
                             {{ user.name|slice(0, 2)|upper }}
                         </button>
 
-                        <div class="absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 divide-y divide-gray-100 hidden group-hover:block">
+                        <div id="user-menu" class="absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 divide-y divide-gray-100 hidden" role="menu" aria-labelledby="user-menu-button">
                             <div class="px-4 py-3">
                                 <p class="text-sm font-medium text-gray-900">{{ user.name }}</p>
                                 <p class="text-sm text-gray-500 truncate">{{ user.email }}</p>
@@ -53,6 +53,40 @@
                             </div>
                         </div>
                     </div>
+                    <script>
+                        (function(){
+                            var btn = document.getElementById('user-menu-button');
+                            var menu = document.getElementById('user-menu');
+                            if (!btn || !menu) return;
+
+                            function openMenu() {
+                                menu.classList.remove('hidden');
+                                btn.setAttribute('aria-expanded', 'true');
+                            }
+                            function closeMenu() {
+                                menu.classList.add('hidden');
+                                btn.setAttribute('aria-expanded', 'false');
+                            }
+                            function toggleMenu(e) {
+                                e.stopPropagation();
+                                if (menu.classList.contains('hidden')) openMenu(); else closeMenu();
+                            }
+
+                            btn.addEventListener('click', toggleMenu);
+
+                            // Close when clicking outside
+                            document.addEventListener('click', function(e){
+                                if (!menu.contains(e.target) && e.target !== btn) {
+                                    closeMenu();
+                                }
+                            });
+
+                            // Close on Escape
+                            document.addEventListener('keydown', function(e){
+                                if (e.key === 'Escape') closeMenu();
+                            });
+                        })();
+                    </script>
                 {% endif %}
             </nav>
         </div>
