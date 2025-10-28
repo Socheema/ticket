@@ -3,7 +3,6 @@
 
 require_once __DIR__ . '/vendor/autoload.php';
 require_once __DIR__ . '/config.php';
-require_once __DIR__ . '/Database.php';
 require_once __DIR__ . '/Auth.php';
 require_once __DIR__ . '/Ticket.php';
 
@@ -64,10 +63,9 @@ if (strpos($uri, '/index.php') === 0) {
 }
 $method = $_SERVER['REQUEST_METHOD'];
 
-// Initialize handlers
-$db = new Database();
-$auth = new Auth($db);
-$ticketHandler = new Ticket($db);
+// Initialize handlers (zero-DB mode: Auth and Ticket are file-backed)
+$auth = new Auth();
+$ticketHandler = new Ticket();
 
 // Get current user
 $currentUser = $auth->getCurrentUser();
