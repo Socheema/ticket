@@ -6,7 +6,6 @@
     <title>{% block title %}TicketFlow - Modern Ticket Management{% endblock %}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
-    <script src="{{ asset('js/ui.js') }}" defer></script>
     <style>
         @keyframes blob {
             0% { transform: translate(0px, 0px) scale(1); }
@@ -29,10 +28,11 @@
     {% block content %}{% endblock %}
 
     <script>
-        // Server-rendered flash -> use showToast (ui.js)
+        // Toast notifications
         {% if successMessage %}
-        window.__FLASH__ = window.__FLASH__ || [];
-        window.__FLASH__.push({ message: '{{ successMessage|e('js') }}', type: 'success' });
+        setTimeout(() => {
+            alert('{{ successMessage }}');
+        }, 100);
         {% endif %}
     </script>
 
