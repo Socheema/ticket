@@ -5,10 +5,25 @@ class Database {
 
     public function __construct() {
         try {
+            // Normalize host: use TCP/IP instead of unix socket when appropriate
+            $host = defined('DB_HOST') ? DB_HOST : getenv('DB_HOST');
+            if ($host === 'localhost') {
+                // force TCP loopback to avoid PDO using unix socket
+                $host = '127.0.0.1';
+            }
+
+            $dsn = 'mysql:host=' . $host;
+            if (defined('DB_PORT') && DB_PORT) {
+                $dsn .= ';port=' . DB_PORT;
+            } elseif (getenv('DB_PORT')) {
+                $dsn .= ';port=' . getenv('DB_PORT');
+            }
+            $dsn .= ';dbname=' . (defined('DB_NAME') ? DB_NAME : getenv('DB_NAME')) . ';charset=utf8mb4';
+
             $this->conn = new PDO(
-                "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4",
-                DB_USER,
-                DB_PASS,
+                $dsn,
+                defined('DB_USER') ? DB_USER : getenv('DB_USER'),
+                defined('DB_PASS') ? DB_PASS : getenv('DB_PASS'),
                 [
                     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,

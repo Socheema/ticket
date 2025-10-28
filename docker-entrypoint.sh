@@ -7,11 +7,13 @@ if [ ! -f /var/www/html/config.php ]; then
 <?php
 // Auto-generated config.php from container entrypoint - reads runtime environment
 // Override by adding a real config.php to the repo or by setting env vars.
-$dbHost = getenv('DB_HOST') ?: 'localhost';
+$dbHost = getenv('DB_HOST') ?: '127.0.0.1';
+$dbPort = getenv('DB_PORT') ?: '3306';
 $dbName = getenv('DB_NAME') ?: 'ticketflow';
 $dbUser = getenv('DB_USER') ?: 'root';
 $dbPass = getenv('DB_PASS') ?: '';
 define('DB_HOST', $dbHost);
+define('DB_PORT', $dbPort);
 define('DB_NAME', $dbName);
 define('DB_USER', $dbUser);
 define('DB_PASS', $dbPass);
