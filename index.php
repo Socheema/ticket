@@ -1,11 +1,11 @@
 <?php
 
 
-require_once 'vendor/autoload.php';
-require_once 'config.php';
-require_once 'Database.php';
-require_once 'Auth.php';
-require_once 'Ticket.php';
+require_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/Database.php';
+require_once __DIR__ . '/Auth.php';
+require_once __DIR__ . '/Ticket.php';
 
 // Initialize Twig
 $loader = new \Twig\Loader\FilesystemLoader(__DIR__ . '/templates');
