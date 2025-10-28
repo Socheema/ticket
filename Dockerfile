@@ -30,8 +30,7 @@ COPY . /var/www/html
 # If a `config.php` wasn't committed to the repo (it's purposely ignored),
 # generate a minimal runtime `config.php` from environment variables so the
 # container has the expected constants and session initialization.
-RUN if [ ! -f /var/www/html/config.php ]; then \
-    cat > /var/www/html/config.php <<'PHP'
+RUN bash -lc "if [ ! -f /var/www/html/config.php ]; then cat > /var/www/html/config.php <<'PHP'
 <?php
 // Auto-generated config.php from Docker build - reads runtime environment
 // Override by adding a real config.php to the repo or by setting env vars.
@@ -71,7 +70,7 @@ if (session_status() === PHP_SESSION_NONE) {
     @session_start();
 }
 PHP
-fi
+fi"
 
 # Ensure cache directory exists and is writable
 RUN mkdir -p /var/www/html/cache && chown -R www-data:www-data /var/www/html/cache
