@@ -4,9 +4,8 @@ This is a small PHP app using Twig templates. This README includes deployment no
 
 Getting started (development)
 
-- Copy `config.example.php` to `config.php` and adjust database credentials and `app_base`.
+- Copy `config.example.php` to `config.php` and adjust `app_base` or `data_dir` as needed.
 - Run `composer install` to install dependencies (if not committed).
-- Import `database.sql` into MySQL.
 - Ensure `cache/` directory is writable by the webserver.
 
 Deployment checklist
@@ -14,7 +13,7 @@ Deployment checklist
 - PHP 8.1+ (this project was tested with PHP 8.2.x).
 - Webserver (Apache with mod_rewrite + AllowOverride All, or Nginx with equivalent rewrite rules).
 - Run `composer install --no-dev --prefer-dist` on the server.
-- Create `config.php` from `config.example.php` or set environment variables: `DB_HOST`, `DB_NAME`, `DB_USER`, `DB_PASS`, `APP_BASE`.
+- Create `config.php` from `config.example.php` or set environment variables: `APP_BASE`, `DATA_DIR`.
 - Ensure `cache/` is writable.
 
 Security
@@ -26,7 +25,6 @@ Useful commands
 
 ```bash
 composer install --no-dev --prefer-dist
-mysql -u dbuser -p dbname < database.sql
 ```
 
 If you want automated deploy from GitHub, consider adding a CI that SSHs into the server and runs `composer install` and any cache warmups.
