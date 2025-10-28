@@ -53,13 +53,41 @@
                             </div>
                         </div>
                     </div>
-                {% endif %}
+                    <script>
+                        (function(){
+                            var btn = document.getElementById('user-menu-button');
+                            var menu = document.getElementById('user-menu');
+                            if (!btn || !menu) return;
 
-                <!-- theme toggle -->
-                <button id="theme-toggle" aria-pressed="false" title="Toggle dark mode" class="ml-2 p-2 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200">
-                    <svg id="theme-toggle-light" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 4.5a.75.75 0 01.75-.75h0a.75.75 0 010 1.5H10.75A.75.75 0 0110 4.5zM10 15.25a.75.75 0 01.75-.75h0a.75.75 0 010 1.5H10.75a.75.75 0 01-.75-.75zM4.5 10a.75.75 0 01-.75-.75h0a.75.75 0 011.5 0V10a.75.75 0 01-.75.75zM15.25 10a.75.75 0 01-.75-.75h0a.75.75 0 011.5 0V10a.75.75 0 01-.75.75zM6.47 6.47a.75.75 0 010-1.06h0a.75.75 0 011.06 1.06L6.47 6.47zM13.53 13.53a.75.75 0 010-1.06h0a.75.75 0 011.06 1.06L13.53 13.53zM6.47 13.53a.75.75 0 010-1.06h0a.75.75 0 011.06 1.06L6.47 13.53zM13.53 6.47a.75.75 0 010-1.06h0a.75.75 0 011.06 1.06L13.53 6.47z"/></svg>
-                    <svg id="theme-toggle-dark" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 hidden" viewBox="0 0 20 20" fill="currentColor"><path d="M17.293 13.293A8 8 0 116.707 2.707 6 6 0 1017.293 13.293z"/></svg>
-                </button>
+                            function openMenu() {
+                                menu.classList.remove('hidden');
+                                btn.setAttribute('aria-expanded', 'true');
+                            }
+                            function closeMenu() {
+                                menu.classList.add('hidden');
+                                btn.setAttribute('aria-expanded', 'false');
+                            }
+                            function toggleMenu(e) {
+                                e.stopPropagation();
+                                if (menu.classList.contains('hidden')) openMenu(); else closeMenu();
+                            }
+
+                            btn.addEventListener('click', toggleMenu);
+
+                            // Close when clicking outside
+                            document.addEventListener('click', function(e){
+                                if (!menu.contains(e.target) && e.target !== btn) {
+                                    closeMenu();
+                                }
+                            });
+
+                            // Close on Escape
+                            document.addEventListener('keydown', function(e){
+                                if (e.key === 'Escape') closeMenu();
+                            });
+                        })();
+                    </script>
+                {% endif %}
             </nav>
         </div>
     </div>
