@@ -22,7 +22,7 @@ COPY composer.json composer.lock /var/www/html/
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 # Install PHP dependencies
-RUN composer install --no-dev --prefer-dist --no-interaction --no-progress --optimize-autoloader || true
+RUN composer install --no-dev --prefer-dist --no-interaction --no-progress --optimize-autoloader
 
 # Copy application code
 COPY . /var/www/html
@@ -35,7 +35,7 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 RUN mkdir -p /var/www/html/cache && chown -R www-data:www-data /var/www/html/cache
 
 # Generate optimized autoload (run again after copying project files)
-RUN composer dump-autoload --optimize || true
+RUN composer dump-autoload --optimize
 
 EXPOSE 80
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
